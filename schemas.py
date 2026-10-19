@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, EmailStr
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
 from typing import Optional, Literal
 from datetime import date, datetime
 
@@ -189,6 +189,20 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=6, max_length=255)
     role: UserRole = "staff"
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def normalize_role(cls, value):
+        if isinstance(value, str):
+            return value.strip().lower()
+        return value
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_length(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Password cannot be longer than 72 bytes; truncate it before hashing.")
+        return value
 
 
 class UserResponse(BaseModel):

@@ -1,10 +1,20 @@
 from pathlib import Path
+import os
+import sys
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE_URL = f"sqlite:///{BASE_DIR / 'bloodlink.db'}"
+
+if "pytest" in sys.modules:
+    DATABASE_FILE = BASE_DIR / 'bloodlink_test.db'
+    if DATABASE_FILE.exists():
+        DATABASE_FILE.unlink()
+else:
+    DATABASE_FILE = BASE_DIR / 'bloodlink.db'
+
+DATABASE_URL = f"sqlite:///{DATABASE_FILE}"
 
 engine = create_engine(
     DATABASE_URL,

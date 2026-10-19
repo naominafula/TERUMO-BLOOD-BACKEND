@@ -83,7 +83,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    if password is None:
+        raise ValueError("Password is required")
+    normalized = password.strip()
+    if len(normalized.encode("utf-8")) > 72:
+        normalized = normalized.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+    return pwd_context.hash(normalized)
 
 
 def create_access_token(username: str, role: str):
